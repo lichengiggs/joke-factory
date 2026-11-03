@@ -9,3 +9,4 @@
 ![1](images/1.jpg)
 
 来源：issues/1
+灵感：@lichengiggs

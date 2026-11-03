@@ -20,6 +20,9 @@ file "$img" | grep -qE 'JPEG|PNG' || { echo "图片格式不对: $img"; exit 1; 
 awk "/^## $id$/{f=1;next} /^## /{f=0} f" joke.md | grep -q '^> ' \
   || { echo "缺少英文引用行"; exit 1; }
 
+awk "/^## $id$/{f=1;next} /^## /{f=0} f" joke.md | grep -q '^灵感：@' \
+  || { echo "缺少灵感作者"; exit 1; }
+
 if grep -q '## 自评' joke.md; then
   echo "joke.md 里不应有自评"
   exit 1

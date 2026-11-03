@@ -162,6 +162,11 @@ process_one() {
     return 0
   fi
 
+  author=$(gh issue view "$n" --json author -q .author.login)
+  if ! grep -q '^灵感：' "$wt/pr/$n.entry.md"; then
+    printf '\n灵感：@%s\n' "$author" >> "$wt/pr/$n.entry.md"
+  fi
+
   if ! grep -q "^## $n$" "$wt/joke.md"; then
     printf '\n' >> "$wt/joke.md"
     cat "$wt/pr/$n.entry.md" >> "$wt/joke.md"
