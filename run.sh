@@ -26,6 +26,15 @@ agent() {
     >> "$ROOT/logs/$3.log" 2>&1
 }
 
+gh_read() {
+  local i
+  for i in 1 2 3; do
+    "$@" && return 0
+    sleep 2
+  done
+  return 1
+}
+
 ensure_labels() {
   gh label create triaged --description "机器收过单，等人放行" --color 0e8a16 >/dev/null 2>&1 || true
   gh label create ready --description "人已放行，可以开工" --color 1d76db >/dev/null 2>&1 || true
@@ -49,7 +58,8 @@ ensure_labels
 triage_one() {
   local n="$1" decision comment
   log "收单 #$n"
-  gh issue view "$n" --json title,body -q '.title + "\n\n" + .body' > "$TRIAGE/$n.raw.md"
+  gh_read gh issue view "$n" --json title,body -q '.title + "\n\n" + .body' > "$TRIAGE/$n.raw.md" \
+    || { log "#$n 读取失败，跳过"; return 0; }
   rm -f "$TRIAGE/$n.md"
 
   if ! agent triage "读 .triage/$n.raw.md，写 .triage/$n.md" "triage-$n"; then
@@ -88,9 +98,13 @@ triage_one() {
 }
 
 scan_triage() {
-  local n count=0
-  for n in $(gh issue list --state open --limit 100 --json number,labels \
-    -q '.[] | select((.labels | map(.name) | index("triaged") | not) and (.labels | map(.name) | index("ready") | not) and (.labels | map(.name) | index("processing") | not) and (.labels | map(.name) | index("not-a-joke-idea") | not)) | .number'); do
+  local n count=0 list
+  if ! list=$(gh_read gh issue list --state open --limit 100 --json number,labels \
+    -q '.[] | select((.labels | map(.name) | index("triaged") | not) and (.labels | map(.name) | index("ready") | not) and (.labels | map(.name) | index("processing") | not) and (.labels | map(.name) | index("not-a-joke-idea") | not)) | .number'); then
+    log "读取 issue 列表失败，跳过"
+    return 0
+  fi
+  for n in $list; do
     triage_one "$n"
     count=$((count + 1))
     [ "$count" -ge 3 ] && break
@@ -128,7 +142,8 @@ process_one() {
   log "开工 #$n"
   gh issue edit "$n" --add-label "processing" >/dev/null
 
-  gh issue view "$n" --json body -q .body > "$INBOX/$n.md"
+  gh_read gh issue view "$n" --json body -q .body > "$INBOX/$n.md" \
+    || { fail "$n" "读取 issue 失败。"; return 0; }
   git fetch origin main >/dev/null 2>&1
 
   if ! git worktree add "$wt" -b "$branch" origin/main >/dev/null; then
@@ -162,7 +177,7 @@ process_one() {
     return 0
   fi
 
-  author=$(gh issue view "$n" --json author -q .author.login)
+  author=$(gh_read gh issue view "$n" --json author -q .author.login || echo unknown)
   if ! grep -q '^灵感：' "$wt/pr/$n.entry.md"; then
     printf '\n灵感：@%s\n' "$author" >> "$wt/pr/$n.entry.md"
   fi
@@ -206,9 +221,12 @@ process_one() {
 
 scan_ready() {
   local n
-  n=$(gh issue list --state open --label ready --limit 20 --json number,labels \
+  if ! n=$(gh_read gh issue list --state open --label ready --limit 20 --json number,labels \
     -q '.[] | select(.labels | map(.name) | index("processing") | not) | .number' \
-    | head -1)
+    | head -1); then
+    log "读取 ready 列表失败，跳过"
+    return 0
+  fi
   if [ -z "$n" ]; then
     log "扫描 ready … 无"
     return 0
