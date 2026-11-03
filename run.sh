@@ -35,6 +35,15 @@ gh_read() {
   return 1
 }
 
+gh_write() {
+  local i
+  for i in 1 2 3; do
+    "$@" && return 0
+    sleep 2
+  done
+  return 1
+}
+
 create_pr() {
   local n="$1" branch="$2" attempt pr
   for attempt in 1 2 3; do
@@ -109,21 +118,21 @@ triage_one() {
     | sed 's/^评论[:：][[:space:]]*//' || true)
 
   if [ -z "$decision" ]; then
-    gh issue comment "$n" --body "收单没跑出结论，请稍后再试。" >/dev/null
-    gh issue edit "$n" --add-label "needs-human" >/dev/null
+    gh issue comment "$n" --body "收单没跑出结论，请稍后再试。" >/dev/null 2>&1 || true
+    gh_write gh issue edit "$n" --add-label "needs-human" >/dev/null || true
     log "#$n 收单结论格式不对，停下"
     return 0
   fi
   [ -n "$comment" ] || comment="收单完成。"
 
   if [ "$decision" = "reject" ]; then
-    gh issue comment "$n" --body "$comment" >/dev/null
-    gh issue edit "$n" --add-label "not-a-joke-idea" >/dev/null
-    gh issue close "$n" --reason "not planned" >/dev/null
+    gh issue comment "$n" --body "$comment" >/dev/null 2>&1 || log "#$n 评论失败"
+    gh_write gh issue edit "$n" --add-label "not-a-joke-idea" >/dev/null || true
+    gh_write gh issue close "$n" --reason "not planned" >/dev/null || true
     log "#$n 已拒绝并关闭"
   else
-    gh issue comment "$n" --body "$comment" >/dev/null
-    gh issue edit "$n" --add-label "triaged" >/dev/null
+    gh issue comment "$n" --body "$comment" >/dev/null 2>&1 || log "#$n 评论失败"
+    gh_write gh issue edit "$n" --add-label "triaged" >/dev/null || true
     log "#$n 收单通过，等 ready"
   fi
   return 0
@@ -172,7 +181,8 @@ process_one() {
   local n="$1" wt="$WORKTREES/$1" branch="joke/$1" round pr
 
   log "开工 #$n"
-  gh issue edit "$n" --add-label "processing" >/dev/null
+  gh_write gh issue edit "$n" --add-label "processing" >/dev/null \
+    || { log "#$n 加 processing 标签失败，跳过"; return 0; }
 
   gh_read gh issue view "$n" --json body -q .body > "$INBOX/$n.md" \
     || { fail "$n" "读取 issue 失败。"; return 0; }
