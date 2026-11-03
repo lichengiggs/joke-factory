@@ -35,6 +35,38 @@ gh_read() {
   return 1
 }
 
+create_pr() {
+  local n="$1" branch="$2" attempt pr
+  for attempt in 1 2 3; do
+    if pr=$(gh pr view "$branch" --json number -q .number 2>/dev/null); then
+      printf '%s\n' "$pr"
+      return 0
+    fi
+    gh pr create --base main --head "$branch" \
+      --title "add joke #$n" --body "Fixes #$n" >/dev/null 2>&1 || true
+    if pr=$(gh pr view "$branch" --json number -q .number 2>/dev/null); then
+      printf '%s\n' "$pr"
+      return 0
+    fi
+    sleep 3
+  done
+  return 1
+}
+
+merge_pr() {
+  local pr="$1" attempt
+  for attempt in 1 2 3; do
+    if gh pr merge "$pr" --squash --delete-branch >/dev/null 2>&1; then
+      return 0
+    fi
+    if [ "$(gh pr view "$pr" --json state -q .state 2>/dev/null)" = "MERGED" ]; then
+      return 0
+    fi
+    sleep 3
+  done
+  return 1
+}
+
 ensure_labels() {
   gh label create triaged --description "机器收过单，等人放行" --color 0e8a16 >/dev/null 2>&1 || true
   gh label create ready --description "人已放行，可以开工" --color 1d76db >/dev/null 2>&1 || true
@@ -179,7 +211,8 @@ process_one() {
 
   author=$(gh_read gh issue view "$n" --json author -q .author.login || echo unknown)
   if ! grep -q '^灵感：' "$wt/pr/$n.entry.md"; then
-    printf '\n灵感：@%s\n' "$author" >> "$wt/pr/$n.entry.md"
+    [ -n "$(tail -c 1 "$wt/pr/$n.entry.md")" ] && printf '\n' >> "$wt/pr/$n.entry.md"
+    printf '灵感：@%s\n' "$author" >> "$wt/pr/$n.entry.md"
   fi
 
   if ! grep -q "^## $n$" "$wt/joke.md"; then
@@ -200,12 +233,11 @@ process_one() {
     git push -u origin "$branch" >/dev/null ) \
     || { fail "$n" "提交或 push 失败。"; return 0; }
 
-  gh pr create --base main --head "$branch" \
-    --title "add joke #$n" --body "Fixes #$n" >/dev/null
-  pr=$(gh pr view "$branch" --json number -q .number)
+  pr=$(create_pr "$n" "$branch") \
+    || { fail "$n" "开 PR 失败。"; return 0; }
   log "#$n 已开 PR #$pr"
 
-  if ! gh pr merge "$pr" --squash --delete-branch >/dev/null; then
+  if ! merge_pr "$pr"; then
     fail "$n" "PR #$pr 合并失败，分支和 PR 留着等人工。"
     return 0
   fi

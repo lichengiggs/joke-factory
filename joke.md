@@ -20,5 +20,4 @@
 ![3](images/3.jpg)
 
 来源：issues/3
-
 灵感：@lichengiggs
