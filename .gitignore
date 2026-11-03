@@ -1,0 +1,8 @@
+.worktrees/
+.inbox/
+.triage/
+logs/
+issues/
+pr/
+.run.pid
+.DS_Store
