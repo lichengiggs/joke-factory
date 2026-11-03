@@ -25,7 +25,7 @@ $COMIC_TOOL --mode panels \
 ```
 
 3. 确认 `images/NNN.jpg` 存在，不是空文件。
-4. 在 `joke.md` 的 `## NNN` 一节里，把下面这行插到「来源：」之前：
+4. 在 `joke.md` 的 `## NNN` 一节里，把下面这行插到「来源：」之前，并在图片行和「来源：」之间留一个空行：
 
 ```
 ![NNN](images/NNN.jpg)

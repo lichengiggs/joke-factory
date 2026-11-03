@@ -40,5 +40,6 @@
 > I tried to catch up on sleep this weekend. The drill upstairs ran nonstop from morning till night. After lying there all day, I finally got it: they weren't renovating—they were canceling my sleep-in subscription.
 
 ![7](images/7.jpg)
+
 来源：issues/7
 灵感：[@lichengiggs](https://github.com/lichengiggs)

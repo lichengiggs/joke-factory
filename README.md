@@ -45,7 +45,7 @@ GitHub issue（任何人可提）
 
 - `git`
 - `gh`，已登录一个有本仓库写权限的账号
-- `opencode`
+- `agent`（Cursor CLI，默认 `--model auto`）
 - 本机的 `../comic-tools/comicgen.py`（配图用）
 
 启动：
