@@ -212,7 +212,7 @@ process_one() {
   author=$(gh_read gh issue view "$n" --json author -q .author.login || echo unknown)
   if ! grep -q '^灵感：' "$wt/pr/$n.entry.md"; then
     [ -n "$(tail -c 1 "$wt/pr/$n.entry.md")" ] && printf '\n' >> "$wt/pr/$n.entry.md"
-    printf '灵感：@%s\n' "$author" >> "$wt/pr/$n.entry.md"
+    printf '灵感：[@%s](https://github.com/%s)\n' "$author" "$author" >> "$wt/pr/$n.entry.md"
   fi
 
   if ! grep -q "^## $n$" "$wt/joke.md"; then

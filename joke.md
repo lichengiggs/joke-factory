@@ -9,7 +9,7 @@
 ![1](images/1.jpg)
 
 来源：issues/1
-灵感：@lichengiggs
+灵感：[@lichengiggs](https://github.com/lichengiggs)
 
 ## 3
 
@@ -20,4 +20,4 @@
 ![3](images/3.jpg)
 
 来源：issues/3
-灵感：@lichengiggs
+灵感：[@lichengiggs](https://github.com/lichengiggs)
