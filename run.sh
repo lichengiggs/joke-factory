@@ -104,7 +104,7 @@ scan_triage() {
 draw() {
   local n="$1" wt="$2" attempt
   for attempt in 1 2 3; do
-    log "d 配图：$n（第 $attempt 次）"
+    log "d 配图：${n}（第 ${attempt} 次）"
     ( cd "$wt" && agent draw "画 $n" "draw-$n-$attempt" ) || true
     if [ -s "$wt/images/$n.jpg" ] || [ -s "$wt/images/$n.png" ]; then
       return 0
