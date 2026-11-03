@@ -7,7 +7,7 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")" && pwd)
 cd "$ROOT"
 
-MODEL=${MODEL:-opencode-go/deepseek-v4.1-flash}
+MODEL=${MODEL:-auto}
 EVERY=${EVERY:-10}
 ONCE=0
 [ "${1:-}" = "--once" ] && ONCE=1
@@ -21,9 +21,10 @@ mkdir -p "$WORKTREES" "$INBOX" "$TRIAGE" "$ROOT/logs" "$ROOT/images"
 
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
-agent() {
-  opencode run --auto -m "$MODEL" "$(cat "prompts/$1.md")" "$2" \
-    >> "$ROOT/logs/$3.log" 2>&1
+ask() {
+  agent -p --force --model "$MODEL" "$(cat "prompts/$1.md")
+
+$2" >> "$ROOT/logs/$3.log" 2>&1
 }
 
 gh_read() {
@@ -103,7 +104,7 @@ triage_one() {
     || { log "#$n 读取失败，跳过"; return 0; }
   rm -f "$TRIAGE/$n.md"
 
-  if ! agent triage "读 .triage/$n.raw.md，写 .triage/$n.md" "triage-$n"; then
+  if ! ask triage "读 .triage/$n.raw.md，写 .triage/$n.md" "triage-$n"; then
     log "#$n 收单调用失败，跳过"
     return 0
   fi
@@ -160,7 +161,7 @@ draw() {
   local n="$1" wt="$2" attempt
   for attempt in 1 2 3; do
     log "d 配图：${n}（第 ${attempt} 次）"
-    ( cd "$wt" && agent draw "画 $n" "draw-$n-$attempt" ) || true
+    ( cd "$wt" && ask draw "画 $n" "draw-$n-$attempt" ) || true
     if [ -s "$wt/images/$n.jpg" ] || [ -s "$wt/images/$n.png" ]; then
       return 0
     fi
@@ -196,14 +197,14 @@ process_one() {
   cp "$INBOX/$n.md" "$wt/issues/$n.raw.md"
   cp "$TRIAGE/$n.md" "$wt/.triage/$n.md" 2>/dev/null || true
 
-  ( cd "$wt" && agent idea "把 $n 收成工单" "idea-$n" ) \
+  ( cd "$wt" && ask idea "把 $n 收成工单" "idea-$n" ) \
     || { fail "$n" "选题失败，见 logs/idea-$n.log"; return 0; }
 
-  ( cd "$wt" && agent write "处理 $n" "write-$n" ) \
+  ( cd "$wt" && ask write "处理 $n" "write-$n" ) \
     || { fail "$n" "写稿失败，见 logs/write-$n.log"; return 0; }
 
   for round in 1 2 3; do
-    ( cd "$wt" && agent review "审 $n" "review-$n-$round" ) || true
+    ( cd "$wt" && ask review "审 $n" "review-$n-$round" ) || true
     if grep -q '^结论: PASS' "$wt/pr/$n.md" 2>/dev/null; then
       break
     fi
@@ -211,7 +212,7 @@ process_one() {
       fail "$n" "审稿连续三轮没通过，需要人工看一眼。"
       return 0
     fi
-    ( cd "$wt" && agent write "处理 $n（按审稿意见返工）" "write-$n-$round" ) || true
+    ( cd "$wt" && ask write "处理 $n（按审稿意见返工）" "write-$n-$round" ) || true
   done
 
   if [ ! -s "$wt/pr/$n.entry.md" ]; then
