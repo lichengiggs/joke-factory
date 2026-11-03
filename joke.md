@@ -43,3 +43,14 @@
 
 来源：issues/7
 灵感：[@lichengiggs](https://github.com/lichengiggs)
+
+## 10
+
+季度末，OKR一清零，办公室瞬间宕机。没人敲键盘，也没人摸鱼——摸鱼也得有目标。领导推门进来，我们齐刷刷抬头：请问，下一题是什么？
+
+> Quarter-end hits, OKRs wipe to zero, and the office flatlines. Nobody types. Nobody even goofs off—you need a target for that too. The boss walks in. We all look up as one: "Excuse me—what's the next question?"
+
+![10](images/10.jpg)
+
+来源：issues/10
+灵感：[@lichengiggs-bot](https://github.com/lichengiggs-bot)
