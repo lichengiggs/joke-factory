@@ -21,3 +21,14 @@
 
 来源：issues/3
 灵感：[@lichengiggs](https://github.com/lichengiggs)
+
+## 5
+
+周六补班，办公室坐得满满当当。我开着表格，同事开着文档，屏幕全亮着。一整天没活，键盘敲得像在发电报。有人接第三杯水，有人把同一封邮件看五遍。五点一到，全屋同时松了口气。唯一的产出是演技。
+
+> Saturday make-up day. The office is packed. I've got a spreadsheet open, my neighbor's got a document open, every screen is glowing. There's no work all day, but the keyboards clatter like telegraph machines. Someone refills their water for the third time. Someone reads the same email five times. At five o'clock the whole floor exhales at once. Our only output today was performance.
+
+![5](images/5.jpg)
+
+来源：issues/5
+灵感：[@lichengiggs](https://github.com/lichengiggs)
