@@ -305,3 +305,32 @@ jobs:
 - 还没有在真实外部 PR 上验证“只改 `joke.md`、追加 `## NNN`”的迁移路径；`build.py` 和 CI 逻辑已具备，建议后续用一个测试 PR 验证。
 - 还没有验证“中途 kill 再启动”的 claim 自清理；启动时会清空 `.claims`，逻辑上已覆盖。
 - 本地 `main` 不会因为 CI 重建而自动更新；需要时执行 `git pull --ff-only`。工厂只依赖 `origin/main`。
+
+---
+
+## 9. 追加修复记录（2026-11-04 晚）
+
+### 运行时错误
+
+- `./run.sh: line 311: MAX_PARALLEL�: unbound variable`
+  - 原因：`"并发已满（$MAX_PARALLEL），..."` 里 `$MAX_PARALLEL` 后面紧跟全角 `）`，bash 把多字节字符当成变量名的一部分。
+  - 修复：改成 `${MAX_PARALLEL}`。全仓库只有这一处这种写法。
+- `#30 失败：建 worktree 失败，分支可能已经存在`
+  - 原因：旧逻辑用 `git worktree add -b`，遇到残留 worktree 或同名分支就失败，而且真实错误被 `/dev/null` 吞掉。
+  - 修复：
+    - 创建前 `git worktree remove --force` + 清理残留目录；
+    - 改用 `git worktree add -B`，允许重建/重置工厂自己的分支；
+    - 失败时把真实 git 错误写进日志和 issue 评论；
+    - 启动时 `git worktree prune`。
+- push 重试
+  - 工厂分支改用 `git push --force-with-lease`；重试前先 fetch 对应远端分支，避免非快进导致反复失败。
+  - 仍然只对 `joke/NNN` 分支强制，**不对 main 强制**。
+
+### 回归验证
+
+- 修复后连续运行默认 `MAX_PARALLEL=2`：
+  - #31、#32 并发处理，PR #34、#35 合并；
+  - #30（之前失败的那条）在槽位释放后自动重试，PR #36 合并；
+  - “并发已满（2），等 worker 结束”正常打印，不再退出。
+- 3 条 issue 全部关闭，`joke.md` 已由 CI 重建，`verify pr` 与 `rebuild joke index` 全部成功。
+- 本轮仍偶发 `Post "https://api.github.com/graphql": EOF`，由 `gh_read` / `gh_write` 的既有重试兜住；push 现在也有重试。
