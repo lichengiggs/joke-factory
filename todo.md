@@ -1,6 +1,6 @@
 # 并发化改造 TODO
 
-状态：方案已定，待实施
+状态：已实施（2026-11-04）；并发 4 条测试通过，见文末“实施记录”。
 目标：`run.sh` 能并发处理多个 `ready` issue；`joke.md` 不因合并冲突阻塞；配图服务不被打爆。
 
 ---
@@ -269,3 +269,39 @@ jobs:
 | 重复处理同一 issue | at-least-once | 幂等键 = issue 编号，原子 claim |
 
 核心一句话：**先消除共享写入点，再谈并发；消除不了，才用单写者排队。**
+
+---
+
+## 8. 实施记录
+
+### 已完成
+
+- 基础改造提交：`dde6f3b refactor: one file per joke, CI rebuilds joke.md`
+- 新增 `jokes/NNN.md`、`build.py`；历史 `joke.md` 已拆分，`build.py` 重复运行无变化。
+- `verify.sh` 改为校验 `jokes/NNN.md` + `images/NNN.*`。
+- `run.sh` 支持 `MAX_PARALLEL`、原子 claim、worktree 重试、push 重试；不再写 `joke.md`，不再更新本地 main。
+- 新增 `.github/workflows/rebuild-joke.yml` 和 `.github/workflows/verify.yml`。
+- `prompts/draw.md` 加 `--timeout 600`。
+- `../comic-tools/comicgen.py`（仓库外）已改为 429 可重试，退避加随机抖动。
+- 文档：`README.md`、`AGENTS.md`、`CONTRIBUTING.md`。
+
+### 并发 4 条实测
+
+- 测试 issue：#21、#22、#23、#24。
+- PR：#25、#26、#27、#28，全部 squash 合并。
+- 4 条 issue 全部关闭，`processing` 已移除。
+- `origin/main` 的 `joke.md` 已包含 `## 21`–`## 24`，编号排序正确。
+- `jokes/21.md`–`jokes/24.md` 和 `images/21.*`–`images/24.*` 均已入库。
+- CI：4 次 `verify pr` 和 4 次 `rebuild joke index` 全部成功。
+
+### 测试中暴露的问题
+
+- #24 的 `git push` 遇到一次远端瞬时拒绝（`remote rejected ... (failed)`），当时 `run.sh` 没有 push 重试，走了 `needs-human`。
+- 手动重试 push 成功，并用 `gh pr create/merge` 补合了 PR #28。
+- 已新增 `push_branch()`：最多 3 次重试，每次间隔递增；失败后仍保留分支，便于人工恢复。
+
+### 尚未覆盖
+
+- 还没有在真实外部 PR 上验证“只改 `joke.md`、追加 `## NNN`”的迁移路径；`build.py` 和 CI 逻辑已具备，建议后续用一个测试 PR 验证。
+- 还没有验证“中途 kill 再启动”的 claim 自清理；启动时会清空 `.claims`，逻辑上已覆盖。
+- 本地 `main` 不会因为 CI 重建而自动更新；需要时执行 `git pull --ff-only`。工厂只依赖 `origin/main`。

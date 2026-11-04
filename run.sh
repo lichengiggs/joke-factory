@@ -84,6 +84,17 @@ merge_pr() {
   return 1
 }
 
+push_branch() {
+  local wt="$1" branch="$2" attempt
+  for attempt in 1 2 3; do
+    if ( cd "$wt" && git push -u origin "$branch" >/dev/null 2>&1 ); then
+      return 0
+    fi
+    sleep $((attempt * 2))
+  done
+  return 1
+}
+
 ensure_labels() {
   gh label create triaged --description "机器收过单，等人放行" --color 0e8a16 >/dev/null 2>&1 || true
   gh label create ready --description "人已放行，可以开工" --color 1d76db >/dev/null 2>&1 || true
@@ -270,9 +281,11 @@ process_one() {
     git add jokes images && \
     git -c user.name="joke-factory" \
         -c user.email="joke-factory@users.noreply.github.com" \
-        commit -m "add joke #$n" >/dev/null && \
-    git push -u origin "$branch" >/dev/null ) \
-    || { fail "$n" "提交或 push 失败。"; return 0; }
+        commit -m "add joke #$n" >/dev/null ) \
+    || { fail "$n" "提交失败。"; return 0; }
+
+  push_branch "$wt" "$branch" \
+    || { fail "$n" "push 失败。"; return 0; }
 
   pr=$(create_pr "$n" "$branch") \
     || { fail "$n" "开 PR 失败。"; return 0; }
