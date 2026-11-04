@@ -176,3 +176,43 @@
 
 来源：issues/29
 灵感：[@lichengiggs](https://github.com/lichengiggs)
+
+## 31
+
+新老板上任第一天，拿花名册点人头，一个一个点，点得特别威风。
+点到最后一页，他停住了。
+最后一行，是他自己的名字。
+他盯着看了半分钟，拿起笔，把自己划掉。
+"人太多了，得优化。"
+
+> The new boss's first day. He stands there with the roster, calling names one by one, very official about it. He reaches the last page and stops. The last name on the list is his own. He stares at it for a full minute, picks up his pen, and crosses it out. "Too many people. Time to optimize."
+
+![31](images/31.jpg)
+
+来源：issues/31
+灵感：[@lichengiggs](https://github.com/lichengiggs)
+
+## 32
+
+电梯里领导叫错我名字，我应了。
+既然应了，就不能回头。
+第二天工牌改了。
+第三天门禁改了。
+现在他喊一声，我应得比本名还快。
+上个月评优，他拍拍我：好好干，别辜负这个名字。
+我点头。
+毕竟，这名字现在带薪。
+
+> The boss got my name wrong in the elevator. I nodded along.
+> Once you nod along, there's no way back.
+> Next day I changed my badge.
+> Then my door access.
+> Now he calls it, and I answer faster than my real name.
+> Last month he praised me, patted my shoulder: don't let the name down.
+> I nodded.
+> This name, at least, gets paid.
+
+![32](images/32.jpg)
+
+来源：issues/32
+灵感：[@lichengiggs](https://github.com/lichengiggs)
