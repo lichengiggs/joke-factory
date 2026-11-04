@@ -7,7 +7,6 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")" && pwd)
 cd "$ROOT"
 
-MODEL=${MODEL:-auto}
 EVERY=${EVERY:-10}
 ONCE=0
 [ "${1:-}" = "--once" ] && ONCE=1
@@ -22,7 +21,7 @@ mkdir -p "$WORKTREES" "$INBOX" "$TRIAGE" "$ROOT/logs" "$ROOT/images"
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
 ask() {
-  agent -p --force --model "$MODEL" "$(cat "prompts/$1.md")
+  cmd --yolo -p "$(cat "prompts/$1.md")
 
 $2" >> "$ROOT/logs/$3.log" 2>&1
 }
@@ -171,11 +170,15 @@ draw() {
 }
 
 fail() {
-  local n="$1" msg="$2"
+  local n="$1" msg="$2" branch="joke/$1" ahead
   log "#$n 失败：$msg"
   gh issue comment "$n" --body "$msg" >/dev/null 2>&1 || true
   gh issue edit "$n" --add-label "needs-human" --remove-label "processing" >/dev/null 2>&1 || true
   git worktree remove --force "$WORKTREES/$n" 2>/dev/null || true
+  ahead=$(git rev-list --count "origin/main..$branch" 2>/dev/null || echo 1)
+  if [ "$ahead" -eq 0 ]; then
+    git branch -D "$branch" >/dev/null 2>&1 || true
+  fi
 }
 
 process_one() {
@@ -212,7 +215,7 @@ process_one() {
       fail "$n" "审稿连续三轮没通过，需要人工看一眼。"
       return 0
     fi
-    ( cd "$wt" && ask write "处理 $n（按审稿意见返工）" "write-$n-$round" ) || true
+    ( cd "$wt" && ask write "处理 ${n}（按审稿意见返工）" "write-$n-$round" ) || true
   done
 
   if [ ! -s "$wt/pr/$n.entry.md" ]; then
@@ -265,7 +268,7 @@ process_one() {
 scan_ready() {
   local n
   if ! n=$(gh_read gh issue list --state open --label ready --limit 20 --json number,labels \
-    -q '.[] | select(.labels | map(.name) | index("processing") | not) | .number' \
+    -q '.[] | select((.labels | map(.name) | index("processing") | not) and (.labels | map(.name) | index("needs-human") | not)) | .number' \
     | head -1); then
     log "读取 ready 列表失败，跳过"
     return 0
