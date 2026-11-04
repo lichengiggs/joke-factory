@@ -29,7 +29,7 @@
 $COMIC_TOOL --mode panels \
   --panel "画面描述|配文" \
   --panel "画面描述|配文" \
-  --name NNN --out-dir images --format jpg
+  --name NNN --out-dir images --format jpg --timeout 600
 ```
 
 4. 确认 `images/NNN.jpg` 存在，不是空文件。脚本会顺手更新 `images/NNN.json`：`input` 记这一版怎么拆的，`previous` 记上一版的拆格和 prompt，重画时拿它对比。

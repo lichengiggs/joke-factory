@@ -1,0 +1,26 @@
+name: verify pr
+on:
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reject direct joke.md edits
+        run: |
+          set -eu
+          base="${{ github.event.pull_request.base.sha }}"
+          if git diff --name-only "$base...HEAD" | grep -qx "joke.md"; then
+            echo "不要直接修改 joke.md；请新增 jokes/NNN.md，joke.md 由 CI 重建。" >&2
+            exit 1
+          fi
+      - name: Verify changed entries
+        run: |
+          set -eu
+          base="${{ github.event.pull_request.base.sha }}"
+          for file in $(git diff --name-only "$base...HEAD" -- 'jokes/*.md'); do
+            id=$(basename "$file" .md)
+            ./verify.sh "$id"
+          done

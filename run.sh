@@ -8,14 +8,22 @@ ROOT=$(cd "$(dirname "$0")" && pwd)
 cd "$ROOT"
 
 EVERY=${EVERY:-10}
+MAX_PARALLEL=${MAX_PARALLEL:-2}
 ONCE=0
-[ "${1:-}" = "--once" ] && ONCE=1
+for arg in "$@"; do
+  [ "$arg" = "--once" ] && ONCE=1
+done
+case "$MAX_PARALLEL" in
+  ''|*[!0-9]*) MAX_PARALLEL=2 ;;
+esac
+[ "$MAX_PARALLEL" -ge 1 ] || MAX_PARALLEL=1
 
 export COMIC_TOOL="$ROOT/../comic-tools/comicgen.py"
 
 WORKTREES="$ROOT/.worktrees"
 INBOX="$ROOT/.inbox"
 TRIAGE="$ROOT/.triage"
+CLAIMS="$ROOT/.claims"
 mkdir -p "$WORKTREES" "$INBOX" "$TRIAGE" "$ROOT/logs" "$ROOT/images"
 
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
@@ -84,6 +92,14 @@ ensure_labels() {
   gh label create not-a-joke-idea --description "不是段子灵感，已关闭" --color 6a737d >/dev/null 2>&1 || true
 }
 
+claim() {
+  mkdir "$CLAIMS/$1" 2>/dev/null
+}
+
+release() {
+  rmdir "$CLAIMS/$1" 2>/dev/null || true
+}
+
 # 单实例，防止两个工厂抢单
 PIDFILE="$ROOT/.run.pid"
 if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
@@ -92,6 +108,9 @@ if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
 fi
 echo $$ > "$PIDFILE"
 trap 'rm -f "$PIDFILE"' EXIT
+
+rm -rf "$CLAIMS"
+mkdir -p "$CLAIMS"
 
 REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 ensure_labels
@@ -141,14 +160,14 @@ triage_one() {
 scan_triage() {
   local n count=0 list
   if ! list=$(gh_read gh issue list --state open --limit 100 --json number,labels \
-    -q '.[] | select((.labels | map(.name) | index("triaged") | not) and (.labels | map(.name) | index("ready") | not) and (.labels | map(.name) | index("processing") | not) and (.labels | map(.name) | index("not-a-joke-idea") | not)) | .number'); then
+    -q '.[] | select((.labels | map(.name) | index("triaged") | not) and (.labels | map(.name) | index("ready") | not) and (.labels | map(.name) | index("processing") | not) and (.labels | map(.name) | index("needs-human") | not) and (.labels | map(.name) | index("not-a-joke-idea") | not)) | .number'); then
     log "读取 issue 列表失败，跳过"
     return 0
   fi
   for n in $list; do
     triage_one "$n"
     count=$((count + 1))
-    [ "$count" -ge 3 ] && break
+    [ "$count" -ge "$MAX_PARALLEL" ] && break
   done
   if [ "$count" -eq 0 ]; then
     log "扫描新 issue … 无"
@@ -179,10 +198,12 @@ fail() {
   if [ "$ahead" -eq 0 ]; then
     git branch -D "$branch" >/dev/null 2>&1 || true
   fi
+  release "$n"
 }
 
 process_one() {
-  local n="$1" wt="$WORKTREES/$1" branch="joke/$1" round pr
+  local n="$1" wt="$WORKTREES/$1" branch="joke/$1" round pr attempt
+  trap "release $n" EXIT
 
   log "开工 #$n"
   gh_write gh issue edit "$n" --add-label "processing" >/dev/null \
@@ -190,13 +211,22 @@ process_one() {
 
   gh_read gh issue view "$n" --json body -q .body > "$INBOX/$n.md" \
     || { fail "$n" "读取 issue 失败。"; return 0; }
-  git fetch origin main >/dev/null 2>&1
+  git fetch origin main >/dev/null 2>&1 || true
 
-  if ! git worktree add "$wt" -b "$branch" origin/main >/dev/null; then
+  local added=0
+  for attempt in 1 2 3; do
+    if git worktree add "$wt" -b "$branch" origin/main >/dev/null 2>&1; then
+      added=1
+      break
+    fi
+    sleep 2
+  done
+  if [ "$added" -ne 1 ]; then
     fail "$n" "建 worktree 失败，分支可能已经存在。"
     return 0
   fi
-  mkdir -p "$wt/issues" "$wt/pr" "$wt/.triage"
+
+  mkdir -p "$wt/issues" "$wt/pr" "$wt/.triage" "$wt/jokes"
   cp "$INBOX/$n.md" "$wt/issues/$n.raw.md"
   cp "$TRIAGE/$n.md" "$wt/.triage/$n.md" 2>/dev/null || true
 
@@ -229,10 +259,7 @@ process_one() {
     printf '灵感：[@%s](https://github.com/%s)\n' "$author" "$author" >> "$wt/pr/$n.entry.md"
   fi
 
-  if ! grep -q "^## $n$" "$wt/joke.md"; then
-    printf '\n' >> "$wt/joke.md"
-    cat "$wt/pr/$n.entry.md" >> "$wt/joke.md"
-  fi
+  cp "$wt/pr/$n.entry.md" "$wt/jokes/$n.md"
 
   draw "$n" "$wt" || log "#$n 配图失败，跳过"
 
@@ -240,7 +267,7 @@ process_one() {
     || { fail "$n" "verify.sh 没过。"; return 0; }
 
   ( cd "$wt" && \
-    git add joke.md images && \
+    git add jokes images && \
     git -c user.name="joke-factory" \
         -c user.email="joke-factory@users.noreply.github.com" \
         commit -m "add joke #$n" >/dev/null && \
@@ -259,32 +286,47 @@ process_one() {
   log "#$n 已合并 PR #$pr"
   git worktree remove --force "$wt" 2>/dev/null || true
   git branch -D "$branch" >/dev/null 2>&1 || true
-  git checkout main >/dev/null 2>&1 || true
-  git pull --ff-only >/dev/null 2>&1 || log "本地 main 拉取失败，请手动 git pull"
   gh issue edit "$n" --remove-label "processing" >/dev/null 2>&1 || true
+  git fetch origin main >/dev/null 2>&1 || true
   return 0
 }
 
 scan_ready() {
-  local n
-  if ! n=$(gh_read gh issue list --state open --label ready --limit 20 --json number,labels \
-    -q '.[] | select((.labels | map(.name) | index("processing") | not) and (.labels | map(.name) | index("needs-human") | not)) | .number' \
-    | head -1); then
+  local n list slots
+  slots=$((MAX_PARALLEL - $(jobs -rp | wc -l)))
+  if [ "$slots" -le 0 ]; then
+    log "并发已满（$MAX_PARALLEL），等 worker 结束"
+    return 0
+  fi
+
+  if ! list=$(gh_read gh issue list --state open --label ready --limit 50 --json number,labels \
+    -q '.[] | select((.labels | map(.name) | index("processing") | not) and (.labels | map(.name) | index("needs-human") | not)) | .number'); then
     log "读取 ready 列表失败，跳过"
     return 0
   fi
-  if [ -z "$n" ]; then
+  if [ -z "$list" ]; then
     log "扫描 ready … 无"
     return 0
   fi
-  process_one "$n"
+
+  for n in $list; do
+    [ "$slots" -le 0 ] && break
+    claim "$n" || continue
+    log "领单 #$n"
+    process_one "$n" &
+    slots=$((slots - 1))
+  done
   return 0
 }
 
-log "段子工厂已启动 · $REPO"
+log "段子工厂已启动 · $REPO · 并发 $MAX_PARALLEL"
 while :; do
+  git fetch origin main >/dev/null 2>&1 || log "git fetch 失败，下轮重试"
   scan_triage
   scan_ready
-  [ "$ONCE" -eq 1 ] && break
+  if [ "$ONCE" -eq 1 ]; then
+    wait
+    break
+  fi
   sleep "$EVERY"
 done

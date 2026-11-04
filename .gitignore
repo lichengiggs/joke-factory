@@ -1,8 +1,10 @@
 .worktrees/
 .inbox/
 .triage/
+.claims/
 logs/
 issues/
 pr/
 .run.pid
 .DS_Store
+__pycache__/
