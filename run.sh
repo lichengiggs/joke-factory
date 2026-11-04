@@ -152,20 +152,23 @@ triage_one() {
     | sed 's/^评论[:：][[:space:]]*//' || true)
 
   if [ -z "$decision" ]; then
-    gh issue comment "$n" --body "收单没跑出结论，请稍后再试。" >/dev/null 2>&1 || true
+    gh_write gh issue comment "$n" --body "收单没跑出结论，请稍后再试。" >/dev/null || true
     gh_write gh issue edit "$n" --add-label "needs-human" >/dev/null || true
     log "#$n 收单结论格式不对，停下"
     return 0
   fi
   [ -n "$comment" ] || comment="收单完成。"
 
+  if ! gh_write gh issue comment "$n" --body "$comment" >/dev/null; then
+    log "#$n 评论发不出去，这轮不处理，下轮再试"
+    return 0
+  fi
+
   if [ "$decision" = "reject" ]; then
-    gh issue comment "$n" --body "$comment" >/dev/null 2>&1 || log "#$n 评论失败"
     gh_write gh issue edit "$n" --add-label "not-a-joke-idea" >/dev/null || true
     gh_write gh issue close "$n" --reason "not planned" >/dev/null || true
     log "#$n 已拒绝并关闭"
   else
-    gh issue comment "$n" --body "$comment" >/dev/null 2>&1 || log "#$n 评论失败"
     gh_write gh issue edit "$n" --add-label "triaged" >/dev/null || true
     log "#$n 收单通过，等 ready"
   fi
@@ -206,7 +209,7 @@ draw() {
 fail() {
   local n="$1" msg="$2" branch="joke/$1" ahead
   log "#$n 失败：$msg"
-  gh issue comment "$n" --body "$msg" >/dev/null 2>&1 || true
+  gh_write gh issue comment "$n" --body "$msg" >/dev/null || true
   gh issue edit "$n" --add-label "needs-human" --remove-label "processing" >/dev/null 2>&1 || true
   git worktree remove --force "$WORKTREES/$n" 2>/dev/null || true
   ahead=$(git rev-list --count "origin/main..$branch" 2>/dev/null || echo 1)
