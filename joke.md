@@ -54,3 +54,14 @@
 
 来源：issues/10
 灵感：[@lichengiggs-bot](https://github.com/lichengiggs-bot)
+
+## 14
+
+群里回话，我敲完字，又花五分钟挑表情。笑太热络，哭太夸张，鼓掌像在阴阳。挑到第三个来回火气上头，我干脆按了最省事的那个。整个表情栏里，我唯一没动脑子就选中的，是点赞。
+
+> Someone messages the group chat. I type my reply, then spend five minutes picking an emoji. A smile is too friendly, a cry is too much, applause reads as sarcasm. By the third pass I'm annoyed and grab the laziest option there is. Out of every emoji in that bar, the only one I chose without thinking was the thumbs up.
+
+![14](images/14.jpg)
+
+来源：issues/14
+灵感：[@lichengiggs](https://github.com/lichengiggs)
