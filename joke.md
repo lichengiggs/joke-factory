@@ -228,6 +228,27 @@
 来源：issues/32
 灵感：[@lichengiggs](https://github.com/lichengiggs)
 
+## 38
+
+定 KPI，老板问这个数能不能做到。
+我说能。
+他点点头，很满意。
+其实我也不知道能不能。
+我只负责把数字写大，把字体加粗。
+到目前为止，我最大的业绩，是这页幻灯片看起来特别有底气。
+
+> Boss asked if the number on the KPI sheet was doable.
+> I said yes.
+> He nodded, very pleased.
+> Honestly, I have no idea.
+> My job was to make the number bigger and the font bolder.
+> So far, my greatest achievement is one slide that looks extremely confident.
+
+![38](images/38.jpg)
+
+来源：issues/38
+灵感：[@lichengiggs](https://github.com/lichengiggs)
+
 ## 39
 
 HR 说这活儿钱少、事多、离家远。
