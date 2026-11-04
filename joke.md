@@ -92,3 +92,22 @@
 
 来源：issues/17
 灵感：[@lichengiggs](https://github.com/lichengiggs)
+
+## 19
+
+周一早会轮到我汇报，我把上周的原话念了一遍。
+没人发现。
+我顺手把上周的咳嗽也补上了。
+领导点头：今天特别稳。
+散会后，我听见整层楼都在咳嗽。
+
+> Monday stand-up. My turn. I read last week's update word for word.
+> Nobody noticed.
+> So I threw in last week's cough.
+> My boss nodded. "Steady as ever."
+> By the afternoon, the whole floor was coughing.
+
+![19](images/19.jpg)
+
+来源：issues/19
+灵感：[@lichengiggs](https://github.com/lichengiggs)
