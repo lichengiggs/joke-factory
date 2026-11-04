@@ -87,9 +87,10 @@ merge_pr() {
 push_branch() {
   local wt="$1" branch="$2" attempt
   for attempt in 1 2 3; do
-    if ( cd "$wt" && git push -u origin "$branch" >/dev/null 2>&1 ); then
+    if ( cd "$wt" && git push --force-with-lease -u origin "$branch" >/dev/null 2>&1 ); then
       return 0
     fi
+    ( cd "$wt" && git fetch origin "+refs/heads/$branch:refs/remotes/origin/$branch" >/dev/null 2>&1 ) || true
     sleep $((attempt * 2))
   done
   return 1
@@ -122,6 +123,7 @@ trap 'rm -f "$PIDFILE"' EXIT
 
 rm -rf "$CLAIMS"
 mkdir -p "$CLAIMS"
+git worktree prune >/dev/null 2>&1 || true
 
 REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 ensure_labels
@@ -224,16 +226,20 @@ process_one() {
     || { fail "$n" "读取 issue 失败。"; return 0; }
   git fetch origin main >/dev/null 2>&1 || true
 
-  local added=0
+  local added=0 err=""
+  git worktree remove --force "$wt" >/dev/null 2>&1 || true
+  [ -e "$wt" ] && rm -rf "$wt"
   for attempt in 1 2 3; do
-    if git worktree add "$wt" -b "$branch" origin/main >/dev/null 2>&1; then
+    if err=$(git worktree add -B "$branch" "$wt" origin/main 2>&1); then
       added=1
       break
     fi
+    log "#$n 建 worktree 第 $attempt 次失败：$err"
+    git worktree prune >/dev/null 2>&1 || true
     sleep 2
   done
   if [ "$added" -ne 1 ]; then
-    fail "$n" "建 worktree 失败，分支可能已经存在。"
+    fail "$n" "建 worktree 失败：$err"
     return 0
   fi
 
@@ -308,7 +314,7 @@ scan_ready() {
   local n list slots
   slots=$((MAX_PARALLEL - $(jobs -rp | wc -l)))
   if [ "$slots" -le 0 ]; then
-    log "并发已满（$MAX_PARALLEL），等 worker 结束"
+    log "并发已满（${MAX_PARALLEL}），等 worker 结束"
     return 0
   fi
 
