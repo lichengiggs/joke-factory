@@ -177,6 +177,17 @@
 来源：issues/29
 灵感：[@lichengiggs](https://github.com/lichengiggs)
 
+## 30
+
+公司给我升了职。名片重印，签名改了，工位挪到窗边。工资条一个数没变。我去问，领导说这是荣誉，比钱值钱。我信了，把任命书裱起来挂门口。房东路过，看了半天，问我是不是出名了。第二天，房租涨了两百。
+
+> The company promoted me. New title on the card, new signature, new desk by the window. Same number on the paycheck. I asked my boss. He said the title is an honor, worth more than money. I believed him. I framed the offer letter and hung it by my door. My landlord walked past, stared at it, asked if I was famous now. Next morning, my rent went up two hundred.
+
+![30](images/30.jpg)
+
+来源：issues/30
+灵感：[@lichengiggs](https://github.com/lichengiggs)
+
 ## 31
 
 新老板上任第一天，拿花名册点人头，一个一个点，点得特别威风。
