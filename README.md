@@ -35,7 +35,7 @@ GitHub issue（任何人可提）
   ├─ 仓库主人打 ready
   │
   ├─ 本机脚本（默认并发 2）
-       worktree → idea → write → review → draw
+       worktree → write → review → draw
        → verify.sh → jokes/NNN.md → PR（Fixes #编号）→ squash 合并
        → 关 issue → 删 worktree
   └─ CI 重建 joke.md（唯一写者）
@@ -74,7 +74,6 @@ MAX_PARALLEL=4 ./run.sh     # 调整并发
 
 ```
 prompts/triage.md   收单
-prompts/idea.md     选题
 prompts/write.md    写段子
 prompts/review.md   审稿
 prompts/draw.md     配图

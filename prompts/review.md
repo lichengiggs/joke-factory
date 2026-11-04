@@ -13,7 +13,7 @@
 
 ## 输入
 
-- `issues/NNN.md`：工单，用来判断有没有回应需求
+- `issues/NNN.raw.md`：issue 原文，当上下文用
 - `pr/NNN.md`：作品
 - `check.md`：判定标准
 

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "deny": [
+      "Shell(git *)",
+      "Shell(gh *)",
+      "Shell(cmd *)",
+      "Shell(curl *)",
+      "Shell(wget *)",
+      "Shell(ssh *)",
+      "Shell(scp *)",
+      "Shell(rm -r *)",
+      "Shell(rm -rf *)",
+      "Edit(.git/**)",
+      "Edit(.commandcode/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(.env*)",
+      "WebFetch",
+      "WebSearch"
+    ]
+  }
+}

@@ -24,12 +24,14 @@ WORKTREES="$ROOT/.worktrees"
 INBOX="$ROOT/.inbox"
 TRIAGE="$ROOT/.triage"
 CLAIMS="$ROOT/.claims"
-mkdir -p "$WORKTREES" "$INBOX" "$TRIAGE" "$ROOT/logs" "$ROOT/images"
+NOAUTH="$ROOT/.noauth"
+mkdir -p "$WORKTREES" "$INBOX" "$TRIAGE" "$NOAUTH" "$ROOT/logs" "$ROOT/images"
 
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
 ask() {
-  cmd --yolo -p "$(cat "prompts/$1.md")
+  env -u GH_TOKEN -u GITHUB_TOKEN GH_CONFIG_DIR="$NOAUTH" \
+    cmd --yolo -p "$(cat "prompts/$1.md")
 
 $2" >> "$ROOT/logs/$3.log" 2>&1
 }
@@ -243,12 +245,8 @@ process_one() {
     return 0
   fi
 
-  mkdir -p "$wt/issues" "$wt/pr" "$wt/.triage" "$wt/jokes"
+  mkdir -p "$wt/issues" "$wt/pr" "$wt/jokes"
   cp "$INBOX/$n.md" "$wt/issues/$n.raw.md"
-  cp "$TRIAGE/$n.md" "$wt/.triage/$n.md" 2>/dev/null || true
-
-  ( cd "$wt" && ask idea "把 $n 收成工单" "idea-$n" ) \
-    || { fail "$n" "选题失败，见 logs/idea-$n.log"; return 0; }
 
   ( cd "$wt" && ask write "处理 $n" "write-$n" ) \
     || { fail "$n" "写稿失败，见 logs/write-$n.log"; return 0; }
