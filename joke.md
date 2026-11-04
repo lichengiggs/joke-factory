@@ -228,6 +228,22 @@
 来源：issues/32
 灵感：[@lichengiggs](https://github.com/lichengiggs)
 
+## 37
+
+打卡机响的那一下，我一天就算干完了。
+剩下的时间，我在工位负责保持在场。
+领导路过，我敲键盘。
+领导一走，我敲键盘的声音更响。
+有同事问我图什么，我说这叫售后。
+机器响完之后，人还得替它站岗。
+
+> The machine beeps, and my workday is officially done. The rest of the day I maintain a presence at my desk. When the boss walks by, I type. When he leaves, I type louder. A coworker asked what this was for. I said after-sales service. The machine clocks out, and the human stays on guard.
+
+![37](images/37.jpg)
+
+来源：issues/37
+灵感：[@lichengiggs](https://github.com/lichengiggs)
+
 ## 38
 
 定 KPI，老板问这个数能不能做到。
