@@ -54,3 +54,14 @@
 
 来源：issues/55
 灵感：[@lichengiggs](https://github.com/lichengiggs)
+
+## 60
+
+每天站会说五分钟。半小时过去，腿麻了还没轮到我。我突然懂了：所谓站会，不是站着开会，是站着等别人开完。
+
+> Daily standup: five minutes, they said. Half an hour later my legs are numb and I still haven't spoken. That's when it clicked—standup isn't a meeting you stand through. It's standing around waiting for everyone else to finish theirs.
+
+![60](images/60.jpg)
+
+来源：issues/60
+灵感：[@lichengiggs](https://github.com/lichengiggs)
