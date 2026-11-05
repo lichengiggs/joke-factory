@@ -65,3 +65,14 @@
 
 来源：issues/60
 灵感：[@lichengiggs](https://github.com/lichengiggs)
+
+## 61
+
+领导在群里 @所有人。两秒后，全员已读。十分钟后，还是没人回。原来工作群反应最快的功能，是证明「我看见了，但别找我」。
+
+> The boss @everyone in the work chat. Two seconds later: all read. Ten minutes later: still silence. Turns out the chat's fastest feature isn't reply—it's proving "I saw it, just don't pick me."
+
+![61](images/61.jpg)
+
+来源：issues/61
+灵感：[@lichengiggs](https://github.com/lichengiggs)
