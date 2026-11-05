@@ -21,3 +21,14 @@
 
 来源：issues/51
 灵感：[@lichengiggs](https://github.com/lichengiggs)
+
+## 53
+
+电梯里有人连按关门，门纹丝不动。外面那人已经冲到门口了。我盯着那个被按到发白的按钮：它不负责关门，它负责给按的人一个「我已经尽力了」的手感。
+
+> Someone in the elevator mashes the door-close button. The door doesn't budge. The person outside is already at the threshold. I stare at that button worn pale: it doesn't close doors—it gives the masher the feeling of having tried their best.
+
+![53](images/53.jpg)
+
+来源：issues/53
+灵感：[@lichengiggs](https://github.com/lichengiggs)
