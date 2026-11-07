@@ -16,8 +16,6 @@
 
 中文段子
 
-> English version
-
 ![NNN](images/NNN.jpg)
 
 来源：issues/NNN

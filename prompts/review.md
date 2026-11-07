@@ -36,8 +36,6 @@
 
 中文
 
-> English
-
 来源：issues/NNN
 ```
 

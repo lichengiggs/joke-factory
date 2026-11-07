@@ -20,7 +20,6 @@ fi
 
 file "$img" | grep -qE 'JPEG|PNG' || { echo "图片格式不对: $img"; exit 1; }
 
-grep -q '^> ' "$entry" || { echo "缺少英文引用行"; exit 1; }
 grep -q '^灵感：\[@' "$entry" || { echo "缺少灵感作者"; exit 1; }
 
 if grep -q '## 自评' "$entry"; then

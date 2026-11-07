@@ -19,7 +19,7 @@
 - 一条段子一个文件：新增 `jokes/NNN.md`，`NNN` 用 issue 编号。
 - 不要直接修改 `joke.md`；改了会被 `verify pr` 检查拦下。
 - 配图放在 `images/NNN.jpg`。
-- `jokes/NNN.md` 的格式和现有文件一致：`## NNN`、中文、`> English`、`来源：issues/NNN`、`灵感：[@作者](...)`。
+- `jokes/NNN.md` 的格式和现有文件一致：`## NNN`、中文、`来源：issues/NNN`、`灵感：[@作者](...)`。
 
 如果你在 `joke.md` 里追加了新的 `## NNN`，CI 会把它迁移成 `jokes/NNN.md`；但不要依赖这个兜底，新增文件才是正确做法。
 
